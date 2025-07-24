@@ -1,69 +1,38 @@
+// JavaScript - Fixed for Modern Dark Theme
 class CVWebsite {
     constructor() {
         this.init();
     }
 
     init() {
-        this.setupNavigation();
-        this.setupSmoothScrolling();
         this.setupMobileMenu();
-        this.setupFormHandling();
         this.setupScrollAnimations();
         this.setupSkillBars();
-        this.setupPrintOptimization();
+        this.setupSmoothScrolling();
+        this.initializeVisibility();
     }
 
-    setupNavigation() {
-        const navLinks = document.querySelectorAll('.nav-link');
-        const sections = document.querySelectorAll('.section');
-
-        // Show home section by default
-        this.showSection('home');
-
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('href').substring(1);
-                
-                // Update active nav link
-                navLinks.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-                
-                // Show target section
-                this.showSection(targetId);
-
-                // Close mobile menu if open
-                const navMenu = document.querySelector('.nav-menu');
-                navMenu.classList.remove('active');
-            });
+    initializeVisibility() {
+        // Make all content visible immediately on page load
+        const fadeElements = document.querySelectorAll('.fade-in');
+        fadeElements.forEach(element => {
+            element.classList.add('loaded');
         });
-    }
-
-    showSection(targetId) {
-        const sections = document.querySelectorAll('.section');
-        
-        sections.forEach(section => {
-            if (section.id === targetId) {
-                section.style.display = 'flex';
-                if (section.classList.contains('page-content')) {
-                    section.classList.add('active');
-                }
-                // Scroll to section smoothly
-                section.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                section.style.display = 'none';
-                section.classList.remove('active');
-            }
-        });
-
-        // Trigger skill bar animations for experience section
-        if (targetId === 'experience' || targetId === 'projects') {
-            setTimeout(() => this.animateSkillBars(), 500);
-        }
     }
 
     setupSmoothScrolling() {
-        document.documentElement.style.scrollBehavior = 'smooth';
+        // Only handle smooth scrolling for anchor links on the same page
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                    e.preventDefault();
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
     }
 
     setupMobileMenu() {
@@ -71,11 +40,12 @@ class CVWebsite {
         const navMenu = document.querySelector('.nav-menu');
 
         if (navToggle && navMenu) {
-            navToggle.addEventListener('click', () => {
+            navToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
                 navMenu.classList.toggle('active');
             });
 
-            // Close mobile menu when clicking on any nav link
+            // Close mobile menu when clicking on any navigation link
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', () => {
                     navMenu.classList.remove('active');
@@ -94,7 +64,7 @@ class CVWebsite {
     setupScrollAnimations() {
         const observerOptions = {
             threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+            rootMargin: '0px 0px -100px 0px'
         };
 
         const observer = new IntersectionObserver((entries) => {
@@ -105,84 +75,63 @@ class CVWebsite {
             });
         }, observerOptions);
 
-        // Observe all bento items for lazy loading animation
-        document.querySelectorAll('.bento-item').forEach(item => {
-            item.classList.add('lazy-load');
-            observer.observe(item);
-        });
-
-        // Observe timeline items
-        document.querySelectorAll('.timeline-item').forEach(item => {
-            item.classList.add('lazy-load');
+        // Observe elements that come into view
+        document.querySelectorAll('.content-card, .content-item').forEach(item => {
             observer.observe(item);
         });
     }
 
     setupSkillBars() {
-        // Initial setup - hide all skill bars
-        const skillBars = document.querySelectorAll('.skill-progress');
-        skillBars.forEach(bar => {
-            const targetWidth = bar.style.width;
-            bar.dataset.targetWidth = targetWidth;
-            bar.style.width = '0%';
-        });
-    }
-
-    animateSkillBars() {
-        const skillBars = document.querySelectorAll('.skill-progress');
-        skillBars.forEach((bar, index) => {
-            const targetWidth = bar.dataset.targetWidth;
-            setTimeout(() => {
-                bar.style.transition = 'width 1.5s ease-out';
-                bar.style.width = targetWidth;
-            }, index * 200); // Stagger animations
-        });
-    }
-
-    setupPrintOptimization() {
-        // Optimize for printing/PDF generation
-        window.addEventListener('beforeprint', () => {
-            // Show all sections for printing
-            const sections = document.querySelectorAll('.section');
-            sections.forEach(section => {
-                section.style.display = 'block';
-                section.style.pageBreakInside = 'avoid';
+        // Animate skill bars when they come into view
+        const skillBarObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const skillBars = entry.target.querySelectorAll('.skill-progress');
+                    skillBars.forEach((bar, index) => {
+                        setTimeout(() => {
+                            bar.style.transition = 'width 2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                            // The width is already set in the HTML, so it will animate
+                        }, index * 200);
+                    });
+                }
             });
-        });
+        }, { threshold: 0.3 });
 
-        window.addEventListener('afterprint', () => {
-            // Restore normal display after printing
-            this.showSection(document.querySelector('.nav-link.active').getAttribute('href').substring(1));
+        // Observe skill sections
+        document.querySelectorAll('.content-item').forEach(item => {
+            if (item.querySelector('.skill-progress')) {
+                skillBarObserver.observe(item);
+            }
         });
     }
 
     showNotification(message, type = 'info') {
-        // Remove existing notifications
         const existingNotifications = document.querySelectorAll('.notification');
         existingNotifications.forEach(notif => notif.remove());
 
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         
         const colors = {
-            success: '#059669',
-            error: '#dc2626',
-            info: '#2563eb'
+            success: '#00d4ff',
+            error: '#ff4757',
+            info: '#00d4ff'
         };
 
         notification.style.cssText = `
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${colors[type] || colors.info};
-            color: white;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(22, 22, 22, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid ${colors[type] || colors.info};
+            color: ${colors[type] || colors.info};
             padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             z-index: 10000;
             transform: translateX(100%);
-            transition: transform 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             max-width: 300px;
             font-weight: 500;
         `;
@@ -190,12 +139,10 @@ class CVWebsite {
 
         document.body.appendChild(notification);
 
-        // Animate in
         setTimeout(() => {
             notification.style.transform = 'translateX(0)';
         }, 100);
 
-        // Remove after 5 seconds
         setTimeout(() => {
             notification.style.transform = 'translateX(100%)';
             setTimeout(() => {
@@ -203,13 +150,12 @@ class CVWebsite {
                     document.body.removeChild(notification);
                 }
             }, 300);
-        }, 5000);
+        }, 4000);
     }
 
-    // Utility method for downloading CV
     downloadCV() {
         const link = document.createElement('a');
-        link.href = 'public/markus-du-plessis-cv.pdf';
+        link.href = 'public/BaseCV (1).pdf';
         link.download = 'Markus_du_Plessis_CV.pdf';
         document.body.appendChild(link);
         link.click();
@@ -235,13 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-    // Performance optimization
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
-            .then(() => console.log('Service Worker registered'))
-            .catch(() => console.log('Service Worker registration failed'));
-    }
 });
 
 // Performance optimization - Preload critical resources
@@ -259,16 +198,4 @@ const preloadCriticalResources = () => {
     });
 };
 
-// Call preload function
 preloadCriticalResources();
-
-// Analytics and performance monitoring (placeholder for future implementation)
-const trackPageView = (page) => {
-    // Placeholder for analytics
-    console.log(`Page view: ${page}`);
-};
-
-// Export for potential module use
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CVWebsite;
-}
