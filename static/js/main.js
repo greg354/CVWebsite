@@ -1,5 +1,3 @@
-// JavaScript - In your project: static/js/main.js
-// Navigation functionality
 class CVWebsite {
     constructor() {
         this.init();
@@ -12,6 +10,7 @@ class CVWebsite {
         this.setupFormHandling();
         this.setupScrollAnimations();
         this.setupSkillBars();
+        this.setupPrintOptimization();
     }
 
     setupNavigation() {
@@ -32,6 +31,10 @@ class CVWebsite {
                 
                 // Show target section
                 this.showSection(targetId);
+
+                // Close mobile menu if open
+                const navMenu = document.querySelector('.nav-menu');
+                navMenu.classList.remove('active');
             });
         });
     }
@@ -45,13 +48,18 @@ class CVWebsite {
                 if (section.classList.contains('page-content')) {
                     section.classList.add('active');
                 }
-                // Scroll to section
+                // Scroll to section smoothly
                 section.scrollIntoView({ behavior: 'smooth' });
             } else {
                 section.style.display = 'none';
                 section.classList.remove('active');
             }
         });
+
+        // Trigger skill bar animations for experience section
+        if (targetId === 'experience' || targetId === 'projects') {
+            setTimeout(() => this.animateSkillBars(), 500);
+        }
     }
 
     setupSmoothScrolling() {
@@ -62,38 +70,31 @@ class CVWebsite {
         const navToggle = document.querySelector('.nav-toggle');
         const navMenu = document.querySelector('.nav-menu');
 
-        navToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-
-        // Close mobile menu when clicking on a link
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                navMenu.classList.remove('active');
+        if (navToggle && navMenu) {
+            navToggle.addEventListener('click', () => {
+                navMenu.classList.toggle('active');
             });
-        });
-    }
 
-    setupFormHandling() {
-        const contactForm = document.querySelector('.contact-form');
-        
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // Get form data
-            const formData = new FormData(contactForm);
-            const data = Object.fromEntries(formData);
-            
-            // Simulate form submission
-            this.showNotification('Message sent successfully! I\'ll get back to you soon.', 'success');
-            contactForm.reset();
-        });
+            // Close mobile menu when clicking on any nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    navMenu.classList.remove('active');
+                });
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                    navMenu.classList.remove('active');
+                }
+            });
+        }
     }
 
     setupScrollAnimations() {
         const observerOptions = {
             threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
+            rootMargin: '0px 0px -50px 0px'
         };
 
         const observer = new IntersectionObserver((entries) => {
@@ -104,41 +105,77 @@ class CVWebsite {
             });
         }, observerOptions);
 
-        // Observe all bento items
+        // Observe all bento items for lazy loading animation
         document.querySelectorAll('.bento-item').forEach(item => {
+            item.classList.add('lazy-load');
+            observer.observe(item);
+        });
+
+        // Observe timeline items
+        document.querySelectorAll('.timeline-item').forEach(item => {
             item.classList.add('lazy-load');
             observer.observe(item);
         });
     }
 
     setupSkillBars() {
-        const animateSkillBars = () => {
-            const skillBars = document.querySelectorAll('.skill-progress');
-            skillBars.forEach(bar => {
-                const width = bar.style.width;
-                bar.style.width = '0%';
-                setTimeout(() => {
-                    bar.style.width = width;
-                }, 300);
-            });
-        };
+        // Initial setup - hide all skill bars
+        const skillBars = document.querySelectorAll('.skill-progress');
+        skillBars.forEach(bar => {
+            const targetWidth = bar.style.width;
+            bar.dataset.targetWidth = targetWidth;
+            bar.style.width = '0%';
+        });
+    }
 
-        // Animate skill bars when experience section is shown
-        const experienceNavLink = document.querySelector('a[href="#experience"]');
-        experienceNavLink.addEventListener('click', () => {
-            setTimeout(animateSkillBars, 500);
+    animateSkillBars() {
+        const skillBars = document.querySelectorAll('.skill-progress');
+        skillBars.forEach((bar, index) => {
+            const targetWidth = bar.dataset.targetWidth;
+            setTimeout(() => {
+                bar.style.transition = 'width 1.5s ease-out';
+                bar.style.width = targetWidth;
+            }, index * 200); // Stagger animations
+        });
+    }
+
+    setupPrintOptimization() {
+        // Optimize for printing/PDF generation
+        window.addEventListener('beforeprint', () => {
+            // Show all sections for printing
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.style.display = 'block';
+                section.style.pageBreakInside = 'avoid';
+            });
+        });
+
+        window.addEventListener('afterprint', () => {
+            // Restore normal display after printing
+            this.showSection(document.querySelector('.nav-link.active').getAttribute('href').substring(1));
         });
     }
 
     showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(notif => notif.remove());
+
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
+        
+        const colors = {
+            success: '#059669',
+            error: '#dc2626',
+            info: '#2563eb'
+        };
+
         notification.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
-            background: ${type === 'success' ? '#10b981' : '#3b82f6'};
+            background: ${colors[type] || colors.info};
             color: white;
             padding: 1rem 1.5rem;
             border-radius: 8px;
@@ -146,6 +183,8 @@ class CVWebsite {
             z-index: 10000;
             transform: translateX(100%);
             transition: transform 0.3s ease;
+            max-width: 300px;
+            font-weight: 500;
         `;
         notification.textContent = message;
 
@@ -160,26 +199,61 @@ class CVWebsite {
         setTimeout(() => {
             notification.style.transform = 'translateX(100%)';
             setTimeout(() => {
-                document.body.removeChild(notification);
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
             }, 300);
         }, 5000);
+    }
+
+    // Utility method for downloading CV
+    downloadCV() {
+        const link = document.createElement('a');
+        link.href = 'public/markus-du-plessis-cv.pdf';
+        link.download = 'Markus_du_Plessis_CV.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        this.showNotification('CV download started!', 'success');
     }
 }
 
 // Initialize website when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new CVWebsite();
+    const website = new CVWebsite();
+    
+    // Make downloadCV available globally
+    window.downloadCV = () => website.downloadCV();
+    
+    // Add keyboard navigation support
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const navMenu = document.querySelector('.nav-menu');
+            if (navMenu) {
+                navMenu.classList.remove('active');
+            }
+        }
+    });
+
+    // Performance optimization
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log('Service Worker registered'))
+            .catch(() => console.log('Service Worker registration failed'));
+    }
 });
 
 // Performance optimization - Preload critical resources
 const preloadCriticalResources = () => {
-    // Add any critical resources to preload
-    const criticalImages = ['public/profile-photo.jpg'];
+    const criticalResources = [
+        'static/css/styles.css'
+    ];
     
-    criticalImages.forEach(src => {
+    criticalResources.forEach(src => {
         const link = document.createElement('link');
         link.rel = 'preload';
-        link.as = 'image';
+        link.as = 'style';
         link.href = src;
         document.head.appendChild(link);
     });
@@ -187,3 +261,14 @@ const preloadCriticalResources = () => {
 
 // Call preload function
 preloadCriticalResources();
+
+// Analytics and performance monitoring (placeholder for future implementation)
+const trackPageView = (page) => {
+    // Placeholder for analytics
+    console.log(`Page view: ${page}`);
+};
+
+// Export for potential module use
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CVWebsite;
+}
