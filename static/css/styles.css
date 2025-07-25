@@ -1,5 +1,3 @@
-/* Modern Dark Theme CV Website Styles */
-/* CSS Reset and Base Styles */
 * {
     margin: 0;
     padding: 0;
@@ -7,7 +5,7 @@
 }
 
 :root {
-    /* Dark theme color palette */
+  
     --bg-primary: #0a0a0a;
     --bg-secondary: #111111;
     --bg-tertiary: #1a1a1a;
@@ -26,16 +24,16 @@
     --border-subtle: #2a2a2a;
     --border-light: #333333;
     
-    /* Typography */
+    
     --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
     
-    /* Spacing and Layout */
+   
     --section-padding: 6rem 0;
     --container-padding: 0 2rem;
     --content-max-width: 1200px;
     
-    /* Effects and Animations */
+   
     --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.3);
     --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.4);
     --shadow-large: 0 16px 64px rgba(0, 0, 0, 0.5);
@@ -47,7 +45,7 @@
     --transition-fast: all 0.15s ease;
 }
 
-/* Base Styles */
+
 html {
     scroll-behavior: smooth;
     overflow-x: hidden;
@@ -62,7 +60,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Background Pattern */
+
 body::before {
     content: '';
     position: fixed;
@@ -78,7 +76,7 @@ body::before {
     z-index: -1;
 }
 
-/* Typography */
+
 h1 {
     font-size: clamp(3rem, 8vw, 5rem);
     font-weight: 700;
@@ -131,7 +129,7 @@ p {
     max-width: 70ch;
 }
 
-/* Navigation - Floating Glass Effect */
+
 .nav {
     position: fixed;
     top: 1rem;
@@ -199,7 +197,7 @@ p {
     cursor: pointer;
 }
 
-/* Container and Layout */
+
 .container {
     max-width: var(--content-max-width);
     margin: 0 auto;
@@ -211,7 +209,7 @@ p {
     position: relative;
 }
 
-/* Hero Section - Flowing Design */
+
 .hero {
     min-height: 100vh;
     display: flex;
@@ -251,7 +249,7 @@ p {
     position: relative;
     box-shadow: var(--glow-accent);
     animation: float 6s ease-in-out infinite;
-    overflow: hidden; /* This is important for circular images */
+    overflow: hidden; 
 }
 
 .hero-image img {
@@ -266,7 +264,7 @@ p {
     50% { transform: translateY(-20px); }
 }
 
-/* Buttons */
+
 .cta-group {
     display: flex;
     gap: 1.5rem;
@@ -313,7 +311,7 @@ p {
     box-shadow: var(--glow-accent);
 }
 
-/* Content Cards - Flowing Layout */
+
 .content-flow {
     display: flex;
     flex-direction: column;
@@ -370,7 +368,7 @@ p {
     margin-top: 2rem;
 }
 
-/* Responsive behavior for 2-column grid */
+
 @media (max-width: 768px) {
     .content-grid-2 {
         grid-template-columns: 1fr;
@@ -391,7 +389,7 @@ p {
     transform: translateY(-2px);
 }
 
-/* Timeline Design */
+
 .timeline {
     position: relative;
     margin: 2rem 0;
@@ -427,7 +425,7 @@ p {
     box-shadow: var(--glow-accent);
 }
 
-/* Skills Progress Bars */
+
 .skill-item {
     margin-bottom: 2rem;
 }
@@ -473,7 +471,7 @@ p {
     100% { left: 100%; }
 }
 
-/* Contact Section */
+
 .contact-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -513,7 +511,7 @@ p {
     margin: 0;
 }
 
-/* Footer */
+
 .footer {
     background: var(--bg-secondary);
     border-top: 1px solid var(--border-subtle);
@@ -551,7 +549,7 @@ p {
     box-shadow: var(--glow-accent);
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
     .nav {
         top: 0.5rem;
@@ -622,12 +620,12 @@ p {
     }
 }
 
-/* Smooth Scrolling Enhancements */
+
 .smooth-scroll {
     scroll-behavior: smooth;
 }
 
-/* Loading Animations */
+
 .fade-in {
     opacity: 0;
     transform: translateY(30px);
@@ -639,13 +637,13 @@ p {
     transform: translateY(0);
 }
 
-/* Selection Styling */
+
 ::selection {
     background: rgba(0, 212, 255, 0.3);
     color: var(--text-primary);
 }
 
-/* Scrollbar Styling */
+
 ::-webkit-scrollbar {
     width: 8px;
 }

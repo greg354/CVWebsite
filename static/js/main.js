@@ -1,4 +1,3 @@
-// JavaScript - Fixed for Modern Dark Theme
 class CVWebsite {
     constructor() {
         this.init();
@@ -12,8 +11,7 @@ class CVWebsite {
         this.initializeVisibility();
     }
 
-    initializeVisibility() {
-        // Make all content visible immediately on page load
+    initializeVisibility() { 
         const fadeElements = document.querySelectorAll('.fade-in');
         fadeElements.forEach(element => {
             element.classList.add('loaded');
@@ -21,7 +19,6 @@ class CVWebsite {
     }
 
     setupSmoothScrolling() {
-        // Only handle smooth scrolling for anchor links on the same page
         document.querySelectorAll('a[href^="#"]').forEach(link => {
             link.addEventListener('click', (e) => {
                 const targetId = link.getAttribute('href').substring(1);
@@ -45,14 +42,12 @@ class CVWebsite {
                 navMenu.classList.toggle('active');
             });
 
-            // Close mobile menu when clicking on any navigation link
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', () => {
                     navMenu.classList.remove('active');
                 });
             });
 
-            // Close mobile menu when clicking outside
             document.addEventListener('click', (e) => {
                 if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
                     navMenu.classList.remove('active');
@@ -75,14 +70,14 @@ class CVWebsite {
             });
         }, observerOptions);
 
-        // Observe elements that come into view
+
         document.querySelectorAll('.content-card, .content-item').forEach(item => {
             observer.observe(item);
         });
     }
 
     setupSkillBars() {
-        // Animate skill bars when they come into view
+
         const skillBarObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -90,14 +85,14 @@ class CVWebsite {
                     skillBars.forEach((bar, index) => {
                         setTimeout(() => {
                             bar.style.transition = 'width 2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                            // The width is already set in the HTML, so it will animate
+                            
                         }, index * 200);
                     });
                 }
             });
         }, { threshold: 0.3 });
 
-        // Observe skill sections
+        
         document.querySelectorAll('.content-item').forEach(item => {
             if (item.querySelector('.skill-progress')) {
                 skillBarObserver.observe(item);
@@ -165,14 +160,14 @@ class CVWebsite {
     }
 }
 
-// Initialize website when DOM is loaded
+
 document.addEventListener('DOMContentLoaded', () => {
     const website = new CVWebsite();
     
-    // Make downloadCV available globally
+
     window.downloadCV = () => website.downloadCV();
     
-    // Add keyboard navigation support
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             const navMenu = document.querySelector('.nav-menu');
@@ -183,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Performance optimization - Preload critical resources
+
 const preloadCriticalResources = () => {
     const criticalResources = [
         'static/css/styles.css'
